@@ -1,0 +1,6 @@
+#todos los MD
+*.md
+# Archivos de entorno virtual
+venv/
+__pycache__/
+*.pyc
