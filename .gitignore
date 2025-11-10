@@ -1,5 +1,6 @@
-#todos los MD
+# Markdown files (except README)
 *.md
+!README.md
 # Archivos de entorno virtual
 venv/
 __pycache__/

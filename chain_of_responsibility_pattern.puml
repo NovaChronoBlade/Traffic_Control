@@ -1,0 +1,234 @@
+@startuml Chain of Responsibility Pattern - Traffic Control
+
+skinparam classAttributeIconSize 0
+skinparam backgroundColor #FEFEFE
+skinparam class {
+    BackgroundColor<<abstract>> #FCE4EC
+    BorderColor<<abstract>> #C2185B
+    BackgroundColor #F3E5F5
+    BorderColor #7B1FA2
+}
+
+' Evento del juego
+class GameEvent {
+    + event_type: str
+    + data: Dict[str, Any]
+    + handled: bool
+    + response: Dict[str, Any]
+    
+    + __init__(event_type: str, data: Dict)
+}
+
+' Handler abstracto
+abstract class EventHandler {
+    # _next_handler: EventHandler
+    # game_state: Dict[str, Any]
+    
+    + set_next(handler: EventHandler): EventHandler
+    
+    .. Template Method ..
+    + handle(event: GameEvent): GameEvent
+    
+    .. Abstract Methods ..
+    {abstract} + can_handle(event: GameEvent): bool
+    {abstract} + process(event: GameEvent): void
+    {abstract} + get_name(): str
+}
+
+' Handlers concretos
+class CollisionHandler {
+    + can_handle(event: GameEvent): bool
+    + process(event: GameEvent): void
+    + get_name(): str
+}
+
+class TrafficViolationHandler {
+    + can_handle(event: GameEvent): bool
+    + process(event: GameEvent): void
+    + get_name(): str
+}
+
+class ScoreHandler {
+    + can_handle(event: GameEvent): bool
+    + process(event: GameEvent): void
+    + get_name(): str
+}
+
+class PowerUpHandler {
+    + can_handle(event: GameEvent): bool
+    + process(event: GameEvent): void
+    + get_name(): str
+}
+
+class CongestionHandler {
+    + can_handle(event: GameEvent): bool
+    + process(event: GameEvent): void
+    + get_name(): str
+}
+
+class LoggingHandler {
+    - event_log: List[Dict]
+    
+    + can_handle(event: GameEvent): bool
+    + process(event: GameEvent): void
+    + get_name(): str
+    + get_recent_events(count: int): List[Dict]
+}
+
+' Sistema de eventos
+class EventSystem {
+    - game_state: Dict[str, Any]
+    - notifications: List[Dict]
+    - first_handler: EventHandler
+    - collision_handler: CollisionHandler
+    - violation_handler: TrafficViolationHandler
+    - score_handler: ScoreHandler
+    - power_up_handler: PowerUpHandler
+    - congestion_handler: CongestionHandler
+    - logging_handler: LoggingHandler
+    
+    + __init__(game_state: Dict)
+    + emit_event(event_type: str, data: Dict): GameEvent
+    + update_notifications(): void
+    + draw_notifications(screen: Surface): void
+    + get_event_log(count: int): List[Dict]
+}
+
+' Game (cliente)
+class Game {
+    - event_system: EventSystem
+    - game_state: Dict[str, Any]
+    - vehicles: List[Vehicle]
+    
+    + check_collisions(): void
+    + check_congestion(): void
+}
+
+' Relaciones de herencia
+EventHandler <|-- CollisionHandler
+EventHandler <|-- TrafficViolationHandler
+EventHandler <|-- ScoreHandler
+EventHandler <|-- PowerUpHandler
+EventHandler <|-- CongestionHandler
+EventHandler <|-- LoggingHandler
+
+' Cadena de responsabilidad
+CollisionHandler --> TrafficViolationHandler : _next_handler
+TrafficViolationHandler --> ScoreHandler : _next_handler
+ScoreHandler --> PowerUpHandler : _next_handler
+PowerUpHandler --> CongestionHandler : _next_handler
+CongestionHandler --> LoggingHandler : _next_handler
+
+' Composición y uso
+EventSystem o--> CollisionHandler
+EventSystem o--> TrafficViolationHandler
+EventSystem o--> ScoreHandler
+EventSystem o--> PowerUpHandler
+EventSystem o--> CongestionHandler
+EventSystem o--> LoggingHandler
+EventSystem ..> GameEvent : <<creates>>
+
+Game o--> EventSystem
+Game ..> GameEvent : <<uses>>
+
+EventHandler ..> GameEvent : <<processes>>
+
+' Notas explicativas
+note top of EventHandler
+  **Handler Base**
+  Define el patrón template para
+  procesar eventos:
+  1. Verifica si puede manejar (can_handle)
+  2. Procesa el evento (process)
+  3. Pasa al siguiente si no está handled
+end note
+
+note left of CollisionHandler
+  **Collision Handler**
+  Maneja: "collision"
+  
+  Acciones:
+  - Reduce vidas (-1)
+  - Penaliza puntos (-100/-300)
+  - Marca vehículos para remover
+  - Incrementa contador
+end note
+
+note left of TrafficViolationHandler
+  **Violation Handler**
+  Maneja: "traffic_violation"
+  
+  Tipos:
+  - red_light: -50 puntos
+  - speeding: -30 puntos
+  - emergency_obstruction: -200
+end note
+
+note bottom of ScoreHandler
+  **Score Handler**
+  Maneja: "vehicle_passed",
+         "smooth_flow",
+         "perfect_timing"
+  
+  Bonificaciones:
+  - Auto normal: +10
+  - Autobús: +20
+  - Emergencia: +30
+  - Flujo perfecto: +50
+end note
+
+note right of PowerUpHandler
+  **Power-Up Handler**
+  Maneja: "power_up"
+  
+  Tipos:
+  - slow_time (5s)
+  - extra_life
+  - score_multiplier (x2, 10s)
+  - clear_traffic
+end note
+
+note right of CongestionHandler
+  **Congestion Handler**
+  Maneja: "congestion"
+  
+  Niveles:
+  - low: -5 puntos
+  - medium: -15 puntos
+  - high: -30 puntos
+  - critical: -50 puntos
+end note
+
+note bottom of LoggingHandler
+  **Logging Handler**
+  Maneja: TODOS los eventos
+  
+  Siempre es el último en la cadena.
+  Registra eventos para debugging.
+  Marca eventos como "handled".
+end note
+
+note top of EventSystem
+  **Event System**
+  Construye y gestiona la cadena.
+  
+  Facilita:
+  - Emisión de eventos
+  - Notificaciones visuales
+  - Acceso al log de eventos
+end note
+
+note bottom of Game
+  **Client**
+  Emite eventos al sistema:
+  
+  emit_event('collision', {
+    'vehicle1': v1,
+    'vehicle2': v2
+  })
+  
+  El sistema procesa el evento
+  a través de la cadena.
+end note
+
+@enduml
