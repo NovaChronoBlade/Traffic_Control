@@ -256,6 +256,17 @@ class VehicleFactory:
 | **Polimorfismo** | Todos los vehículos pueden ser tratados uniformemente |
 | **Hooks opcionales** | `special_behavior()` y `post_move_behavior()` permiten extensiones opcionales |
 
+#### 📊 Diagrama UML - Template Method Pattern
+
+**Ver diagrama completo:** [template_method_pattern.puml](template_method_pattern.puml)
+
+El diagrama muestra:
+- La clase abstracta `Vehicle` con el Template Method `update()`
+- Los 5 tipos de vehículos concretos (Car, FastCar, Bus, EmergencyVehicle, Truck)
+- El patrón Factory para creación de vehículos
+- Las operaciones primitivas (abstractas) y los hooks (opcionales)
+- Las relaciones de herencia y dependencias
+
 ---
 
 ### 🔄 2. State (Estado)
@@ -439,6 +450,18 @@ if light:
 | **Transiciones claras** | Las transiciones están bien definidas |
 | **Mantenibilidad** | Cambios en un estado no afectan a otros |
 | **Single Responsibility** | Cada clase de estado tiene una única responsabilidad |
+
+#### 📊 Diagrama UML - State Pattern
+
+**Ver diagrama completo:** [state_pattern.puml](state_pattern.puml)
+
+El diagrama muestra:
+- La clase abstracta `TrafficLightState` con la interfaz de estados
+- Los 3 estados concretos (GreenState, YellowState, RedState)
+- La clase contexto `TrafficLight` que mantiene el estado actual
+- El controlador `TrafficLightController` que coordina múltiples semáforos
+- Las transiciones entre estados (Verde → Amarillo → Rojo → Verde)
+- Las capacidades de control manual del jugador
 
 ---
 
@@ -713,6 +736,18 @@ if vehicle.is_off_screen(SCREEN_WIDTH, SCREEN_HEIGHT):
 | **Extensibilidad** | Nuevos tipos de eventos se agregan sin modificar código existente |
 | **Registro centralizado** | LoggingHandler captura todos los eventos al final |
 | **Notificaciones automáticas** | EventSystem genera notificaciones visuales automáticamente |
+
+#### 📊 Diagrama UML - Chain of Responsibility Pattern
+
+**Ver diagrama completo:** [chain_of_responsibility_pattern.puml](chain_of_responsibility_pattern.puml)
+
+El diagrama muestra:
+- La clase base `EventHandler` con el patrón template para procesar eventos
+- Los 6 manejadores concretos en la cadena (Collision, Violation, Score, PowerUp, Congestion, Logging)
+- La clase `GameEvent` que encapsula los datos del evento
+- El `EventSystem` que construye y gestiona la cadena
+- La clase `Game` como cliente que emite eventos
+- El flujo de procesamiento a través de la cadena de responsabilidad
 
 ---
 

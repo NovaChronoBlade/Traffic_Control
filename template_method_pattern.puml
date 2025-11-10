@@ -1,0 +1,174 @@
+@startuml Template Method Pattern - Traffic Control
+
+skinparam classAttributeIconSize 0
+skinparam backgroundColor #FEFEFE
+skinparam class {
+    BackgroundColor<<abstract>> #E1F5FE
+    BorderColor<<abstract>> #0277BD
+    BackgroundColor #FFF9C4
+    BorderColor #F57F17
+}
+
+' Clase abstracta Vehicle
+abstract class Vehicle {
+    # x: float
+    # y: float
+    # direction: str
+    # speed: float
+    # max_speed: float
+    # acceleration: float
+    # size: Tuple[int, int]
+    # color: Tuple[int, int, int]
+    # stopped: bool
+    # has_priority: bool
+    
+    .. Template Method ..
+    + update(dt: float, can_move: bool): void
+    
+    .. Primitive Operations (Abstract) ..
+    {abstract} + get_base_speed(): float
+    {abstract} + get_max_speed(): float
+    {abstract} + get_acceleration(): float
+    {abstract} + get_size(): Tuple[int, int]
+    {abstract} + get_color(): Tuple[int, int, int]
+    
+    .. Concrete Operations ..
+    + move(dt: float): void
+    + accelerate(dt: float): void
+    + decelerate(dt: float): void
+    + draw(screen: Surface): void
+    + is_off_screen(width: int, height: int): bool
+    + get_rect(): Rect
+    
+    .. Hooks (Optional) ..
+    + special_behavior(dt: float): void
+    + post_move_behavior(): void
+    + check_priority(): bool
+}
+
+note right of Vehicle::update
+  **Template Method**
+  Define el esqueleto del algoritmo:
+  1. special_behavior(dt)
+  2. accelerate() o decelerate()
+  3. move(dt)
+  4. post_move_behavior()
+  
+  Las subclases NO pueden cambiar
+  este flujo, solo implementar
+  los pasos individuales.
+end note
+
+' Clase Car
+class Car {
+    + get_base_speed(): float
+    + get_max_speed(): float
+    + get_acceleration(): float
+    + get_size(): Tuple[int, int]
+    + get_color(): Tuple[int, int, int]
+    + get_image_name(): str
+}
+
+' Clase FastCar
+class FastCar {
+    + get_base_speed(): float
+    + get_max_speed(): float
+    + get_acceleration(): float
+    + get_size(): Tuple[int, int]
+    + get_color(): Tuple[int, int, int]
+    + get_image_name(): str
+    + special_behavior(dt: float): void
+}
+
+' Clase Bus
+class Bus {
+    + get_base_speed(): float
+    + get_max_speed(): float
+    + get_acceleration(): float
+    + get_size(): Tuple[int, int]
+    + get_color(): Tuple[int, int, int]
+    + get_image_name(): str
+    + special_behavior(dt: float): void
+}
+
+' Clase EmergencyVehicle
+class EmergencyVehicle {
+    + get_base_speed(): float
+    + get_max_speed(): float
+    + get_acceleration(): float
+    + get_size(): Tuple[int, int]
+    + get_color(): Tuple[int, int, int]
+    + get_image_name(): str
+    + check_priority(): bool
+    + draw(screen: Surface): void
+}
+
+' Clase Truck
+class Truck {
+    + get_base_speed(): float
+    + get_max_speed(): float
+    + get_acceleration(): float
+    + get_size(): Tuple[int, int]
+    + get_color(): Tuple[int, int, int]
+    + get_image_name(): str
+    + decelerate(dt: float): void
+}
+
+' Factory
+class VehicleFactory {
+    {static} + create_vehicle(type: str, x: float, y: float, direction: str, lane: int): Vehicle
+    {static} + create_random_vehicle(x: float, y: float, direction: str, lane: int): Vehicle
+}
+
+' Relaciones
+Vehicle <|-- Car
+Vehicle <|-- FastCar
+Vehicle <|-- Bus
+Vehicle <|-- EmergencyVehicle
+Vehicle <|-- Truck
+
+VehicleFactory ..> Vehicle : <<creates>>
+VehicleFactory ..> Car : <<creates>>
+VehicleFactory ..> FastCar : <<creates>>
+VehicleFactory ..> Bus : <<creates>>
+VehicleFactory ..> EmergencyVehicle : <<creates>>
+VehicleFactory ..> Truck : <<creates>>
+
+' Notas adicionales
+note left of Car
+  **Vehículo estándar**
+  Velocidad: 150 px/s
+  Tamaño: 50x30
+  Probabilidad: 50%
+end note
+
+note left of FastCar
+  **Auto rápido**
+  Velocidad: 250 px/s
+  Hook: zigzaguea ligeramente
+  Probabilidad: 20%
+end note
+
+note left of Bus
+  **Autobús**
+  Velocidad: 100 px/s
+  Hook: hace paradas
+  Probabilidad: 15%
+end note
+
+note right of EmergencyVehicle
+  **Vehículo de emergencia**
+  Velocidad: 200 px/s
+  Prioridad: Sí
+  Hook: efecto de sirena
+  Probabilidad: 5%
+end note
+
+note right of Truck
+  **Camión**
+  Velocidad: 80 px/s
+  Hook: frena lentamente
+  Probabilidad: 10%
+end note
+
+@enduml

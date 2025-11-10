@@ -1,0 +1,172 @@
+@startuml State Pattern - Traffic Control
+
+skinparam classAttributeIconSize 0
+skinparam backgroundColor #FEFEFE
+skinparam class {
+    BackgroundColor<<abstract>> #E8F5E9
+    BorderColor<<abstract>> #2E7D32
+    BackgroundColor #FFF3E0
+    BorderColor #E65100
+}
+
+' Clase abstracta State
+abstract class TrafficLightState {
+    # traffic_light: TrafficLight
+    # time_in_state: float
+    
+    .. State Interface ..
+    {abstract} + get_color(): Tuple[int, int, int]
+    {abstract} + can_pass(): bool
+    {abstract} + get_duration(): float
+    {abstract} + next_state(): TrafficLightState
+    {abstract} + get_name(): str
+    
+    .. Common Behavior ..
+    + update(dt: float): void
+    + on_enter(): void
+    + on_exit(): void
+}
+
+' Estados concretos
+class GreenState {
+    + get_color(): Tuple[int, int, int]
+    + can_pass(): bool
+    + get_duration(): float
+    + next_state(): TrafficLightState
+    + get_name(): str
+    + on_enter(): void
+}
+
+class YellowState {
+    + get_color(): Tuple[int, int, int]
+    + can_pass(): bool
+    + get_duration(): float
+    + next_state(): TrafficLightState
+    + get_name(): str
+}
+
+class RedState {
+    + get_color(): Tuple[int, int, int]
+    + can_pass(): bool
+    + get_duration(): float
+    + next_state(): TrafficLightState
+    + get_name(): str
+}
+
+' Contexto
+class TrafficLight {
+    - _state: TrafficLightState
+    - x: int
+    - y: int
+    - direction: str
+    - green_duration: float
+    - yellow_duration: float
+    - red_duration: float
+    - manual_override: bool
+    
+    + __init__(x: int, y: int, direction: str)
+    + change_state(new_state: TrafficLightState): void
+    + update(dt: float): void
+    
+    .. Delegated to State ..
+    + can_pass(): bool
+    + get_color(): Tuple[int, int, int]
+    + get_state_name(): str
+    + get_time_remaining(): float
+    
+    .. Manual Control ..
+    + toggle_manual_override(): void
+    + force_green(): void
+    + force_red(): void
+    + force_yellow(): void
+    + cycle_state(): void
+    
+    .. Visualization ..
+    + draw(screen: Surface): void
+}
+
+' Controlador
+class TrafficLightController {
+    - traffic_lights: List[TrafficLight]
+    - horizontal_lights: List[TrafficLight]
+    - vertical_lights: List[TrafficLight]
+    
+    + add_traffic_light(light: TrafficLight): void
+    + update(dt: float): void
+    + coordinate_lights(): void
+    + draw_all(screen: Surface): void
+    + get_light_at_position(x: int, y: int): TrafficLight
+}
+
+' Relaciones
+TrafficLightState <|-- GreenState
+TrafficLightState <|-- YellowState
+TrafficLightState <|-- RedState
+
+TrafficLight o--> TrafficLightState : _state
+TrafficLight ..> GreenState : <<creates>>
+TrafficLight ..> YellowState : <<creates>>
+TrafficLight ..> RedState : <<creates>>
+
+TrafficLightController "1" o--> "4..*" TrafficLight : manages
+
+' Transiciones de estado
+GreenState .right.> YellowState : next_state()
+YellowState .right.> RedState : next_state()
+RedState .up.> GreenState : next_state()
+
+' Notas
+note top of TrafficLightState
+  **State Interface**
+  Define el comportamiento común
+  de todos los estados del semáforo.
+  Cada estado concreto implementa
+  su propia lógica.
+end note
+
+note left of GreenState
+  **Estado Verde**
+  Color: (0, 255, 0)
+  Can pass: True
+  Duración: configurable (6s default)
+  Siguiente: YellowState
+end note
+
+note bottom of YellowState
+  **Estado Amarillo**
+  Color: (255, 255, 0)
+  Can pass: False
+  Duración: 2s
+  Siguiente: RedState
+end note
+
+note right of RedState
+  **Estado Rojo**
+  Color: (255, 0, 0)
+  Can pass: False
+  Duración: configurable (6s default)
+  Siguiente: GreenState
+end note
+
+note bottom of TrafficLight
+  **Context**
+  Mantiene referencia al estado actual
+  y delega comportamiento a él.
+  
+  El jugador puede controlar manualmente
+  los semáforos mediante clicks.
+end note
+
+note right of TrafficLightController
+  **Coordinator**
+  Gestiona múltiples semáforos
+  y asegura que semáforos
+  perpendiculares no estén
+  verdes simultáneamente.
+  
+  4 semáforos en la intersección:
+  - 2 horizontales (este-oeste)
+  - 2 verticales (norte-sur)
+end note
+
+@enduml
