@@ -6,6 +6,13 @@ Implementación de cadena de manejadores para procesar eventos del juego
 from abc import ABC, abstractmethod
 from typing import Optional, Dict, Any
 import pygame
+from src.config import (
+    POINTS_NORMAL_CAR, POINTS_BUS, POINTS_EMERGENCY, 
+    POINTS_SMOOTH_FLOW, POINTS_PERFECT_TIMING,
+    PENALTY_COLLISION, PENALTY_COLLISION_EMERGENCY, 
+    PENALTY_VIOLATION, PENALTY_CONGESTION_LOW, 
+    PENALTY_CONGESTION_MEDIUM
+)
 
 
 class GameEvent:
@@ -82,11 +89,11 @@ class CollisionHandler(EventHandler):
         
         if vehicle1 and vehicle2:
             # Penalización por colisión
-            penalty = 100
+            penalty = PENALTY_COLLISION
             
             # Mayor penalización si uno es vehículo de emergencia
             if vehicle1.has_priority or vehicle2.has_priority:
-                penalty = 300
+                penalty = PENALTY_COLLISION_EMERGENCY
             
             self.game_state['score'] = max(0, self.game_state['score'] - penalty)
             self.game_state['lives'] -= 1
@@ -125,7 +132,7 @@ class TrafficViolationHandler(EventHandler):
         vehicle = event.data.get('vehicle')
         
         penalties = {
-            'red_light': 50,
+            'red_light': PENALTY_VIOLATION,
             'speeding': 30,
             'wrong_lane': 40,
             'emergency_obstruction': 200
@@ -173,30 +180,29 @@ class ScoreHandler(EventHandler):
         if event.event_type == "vehicle_passed":
             # Puntos por cada vehículo que pasa exitosamente
             vehicle = event.data.get('vehicle')
-            base_points = 10
             
             # Bonus por vehículos especiales
             if hasattr(vehicle, 'has_priority') and vehicle.has_priority:
-                points = base_points * 3
-                message = "¡Vehículo de emergencia! +30 puntos"
+                points = POINTS_EMERGENCY
+                message = f"¡Vehículo de emergencia! +{POINTS_EMERGENCY} puntos"
             elif vehicle.__class__.__name__ == 'Bus':
-                points = base_points * 2
-                message = "¡Autobús pasó! +20 puntos"
+                points = POINTS_BUS
+                message = f"¡Autobús pasó! +{POINTS_BUS} puntos"
             else:
-                points = base_points
-                message = "+10 puntos"
+                points = POINTS_NORMAL_CAR
+                message = f"+{POINTS_NORMAL_CAR} puntos"
             
             self.game_state['vehicles_passed'] += 1
             
         elif event.event_type == "smooth_flow":
             # Bonus por mantener el flujo sin detenciones
-            points = 50
-            message = "¡Flujo perfecto! +50 puntos"
+            points = POINTS_SMOOTH_FLOW
+            message = f"¡Flujo perfecto! +{POINTS_SMOOTH_FLOW} puntos"
             
         elif event.event_type == "perfect_timing":
             # Bonus por cambiar semáforo en el momento perfecto
-            points = 25
-            message = "¡Timing perfecto! +25 puntos"
+            points = POINTS_PERFECT_TIMING
+            message = f"¡Timing perfecto! +{POINTS_PERFECT_TIMING} puntos"
         
         self.game_state['score'] += points
         
@@ -281,8 +287,8 @@ class CongestionHandler(EventHandler):
         
         # Penalización basada en el nivel de congestión
         penalties = {
-            'low': 5,
-            'medium': 15,
+            'low': PENALTY_CONGESTION_LOW,
+            'medium': PENALTY_CONGESTION_MEDIUM,
             'high': 30,
             'critical': 50
         }
