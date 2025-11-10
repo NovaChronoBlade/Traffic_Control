@@ -6,7 +6,9 @@ Un proyecto desarrollado en **Python** utilizando **Pygame**, que implementa los
 
 ## 👨‍💻 Autor
 
-* NovaChronoBlade
+* Juan Camilo Mosquera Palomino - 20241020120
+
+* Andres Felipe Lopez Martinez - 20241020052
 
 Proyecto educativo desarrollado para demostrar patrones de diseño en Python con Pygame.
 
